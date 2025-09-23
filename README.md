@@ -55,7 +55,12 @@ pnpm install
 ### 3. Set up Supabase
 1. Create a new Supabase project
 2. Enable Realtime on `public.notifications` table
-3. Run the SQL schema: Copy contents of `sql/schema.sql` and execute in Supabase SQL editor
+3. **Configure Email Authentication:**
+   - Go to Authentication > Settings in Supabase dashboard
+   - Enable "Enable email confirmations"
+   - Set "Site URL" to your domain (e.g., `http://localhost:3000`)
+   - Configure email templates if needed
+4. Run the SQL schema: Copy contents of `sql/schema.sql` and execute in Supabase SQL editor
 
 ### 4. Environment Configuration
 Create `.env.local` file in the root directory:
@@ -101,6 +106,12 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) to access the application.
 
+### 7. Test Email Verification
+```bash
+# Run the email verification test
+node test-email-verification.js
+```
+
 ## 📱 Usage
 
 ### Regular Users
@@ -118,8 +129,10 @@ Open [http://localhost:3000](http://localhost:3000) to access the application.
 ## 🔌 API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - User registration
+- `POST /api/auth/register` - User registration (sends verification email)
 - `POST /api/auth/login` - User login
+- `POST /api/auth/verify-email` - Verify email with token
+- `POST /api/auth/resend-verification` - Resend verification email
 - `POST /api/auth/token/refresh` - Refresh JWT token
 - `POST /api/auth/logout` - User logout
 - `POST /api/auth/password-reset` - Request password reset

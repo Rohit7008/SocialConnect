@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { registerSchema } from "@/lib/validators";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import bcrypt from "bcryptjs";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-  process.env.SUPABASE_SERVICE_ROLE_KEY as string
-);
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -20,40 +15,85 @@ export async function POST(req: NextRequest) {
 
   const { email, username, password, first_name, last_name } = parsed.data;
 
-  // Ensure unique username
-  const { data: existing, error: exErr } = await supabase
+  // Check if username already exists
+  const { data: existingUsername, error: usernameError } = await supabaseAdmin
     .from("profiles")
     .select("id")
-    .or(`email.eq.${email},username.eq.${username}`)
+    .eq("username", username)
     .maybeSingle();
-  if (exErr)
-    return NextResponse.json({ detail: exErr.message }, { status: 500 });
-  if (existing)
+  
+  if (usernameError)
+    return NextResponse.json({ detail: usernameError.message }, { status: 500 });
+  if (existingUsername)
     return NextResponse.json(
-      { detail: "Email or username already exists" },
+      { detail: "Username already exists" },
       { status: 409 }
     );
 
-  const password_hash = await bcrypt.hash(password, 10);
-  const { data, error } = await supabase
-    .from("profiles")
-    .insert({
-      email,
-      username,
-      first_name,
-      last_name,
-      password_hash,
-      role: "user",
-      is_verified: false,
-    })
-    .select("id")
-    .single();
-  if (error)
-    return NextResponse.json({ detail: error.message }, { status: 500 });
+  try {
+    // Create profile record directly (using our custom auth system)
+    const password_hash = await bcrypt.hash(password, 10);
+    const { data: profileData, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .insert({
+        email,
+        username,
+        first_name,
+        last_name,
+        password_hash,
+        role: "user",
+        is_verified: false,
+      })
+      .select("id")
+      .single();
 
-  // Send verification email integration would go here (omitted). Mark unverified.
-  return NextResponse.json(
-    { id: data.id, message: "Registered. Please verify email." },
-    { status: 201 }
-  );
+    if (profileError) {
+      console.error("Profile creation error:", profileError);
+      return NextResponse.json(
+        { detail: "Failed to create user profile" },
+        { status: 500 }
+      );
+    }
+
+    // Send verification email
+    try {
+      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/send-verification-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          userId: profileData.id,
+        }),
+      });
+
+      const emailData = await emailResponse.json();
+      
+      if (emailResponse.ok) {
+        console.log("Verification email sent:", emailData.message);
+      } else {
+        console.warn("Failed to send verification email:", emailData.detail);
+      }
+    } catch (emailError) {
+      console.warn("Error sending verification email:", emailError);
+      // Don't fail registration if email sending fails
+    }
+
+    return NextResponse.json(
+      { 
+        id: profileData.id, 
+        message: "Registration successful! Please check your email to verify your account.",
+        verification_required: true
+      },
+      { status: 201 }
+    );
+
+  } catch (error) {
+    console.error("Registration error:", error);
+    return NextResponse.json(
+      { detail: "Registration failed. Please try again." },
+      { status: 500 }
+    );
+  }
 }
