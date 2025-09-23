@@ -9,4 +9,22 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+  db: {
+    schema: 'public',
+  },
+  global: {
+    headers: {
+      'x-application-name': 'socialconnect-webapp',
+    },
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
+});

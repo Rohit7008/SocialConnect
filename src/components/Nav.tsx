@@ -366,6 +366,14 @@ function ProfileMenu() {
           >
             Profile
           </Link>
+          {userProfile?.role === "admin" && (
+            <Link
+              href="/admin"
+              className="block px-3 py-2 hover:bg-[color-mix(in_oklab,_var(--foreground)_8%,_transparent)] text-purple-600"
+            >
+              Admin Panel
+            </Link>
+          )}
           <Link
             href="/logout"
             className="block px-3 py-2 hover:bg-[color-mix(in_oklab,_var(--foreground)_8%,_transparent)]"
@@ -449,3 +457,5 @@ export function Nav() {
     </nav>
   );
 }
+
+export { Nav };
