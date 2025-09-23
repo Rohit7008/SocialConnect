@@ -348,7 +348,6 @@ function ProfileMenu() {
         aria-expanded={open}
       >
         {userProfile?.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={userProfile.avatar_url}
             alt="Profile"
@@ -457,5 +456,3 @@ export function Nav() {
     </nav>
   );
 }
-
-export { Nav };
