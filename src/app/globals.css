@@ -1,26 +1,95 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light mode defaults */
+  --background: #F5F5F5;
+  --foreground: #1A1A1A;
+  --surface: #ffffff;
+  --surface-hover: #f3f4f6;
+  --primary-start: #8B5CF6; /* purple */
+  --primary-end: #EC4899;   /* pink */
+  --primary-gradient: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+  --secondary-blue: #00B4D8;
+  --secondary-green: #00FF9D;
+  --muted: #E5E5E5;
+  --muted-foreground: #4B5563;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-primary: var(--primary-end);
+  --color-primary-start: var(--primary-start);
+  --color-primary-end: var(--primary-end);
+  --color-secondary-blue: var(--secondary-blue);
+  --color-secondary-green: var(--secondary-green);
+  --gradient-primary: var(--primary-gradient);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* Dark mode when following system (no explicit theme set) */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #141414; /* slightly lighter for better contrast */
+    --foreground: #ffffff;
+    --surface: #1A1A1A;
+    --surface-hover: #222222;
+    --muted: #2a2a2a;
+    --muted-foreground: #a3a3a3;
   }
+}
+
+/* Explicit theme overrides via attribute */
+html[data-theme="light"] {
+  --background: #F5F5F5;
+  --foreground: #1A1A1A;
+  --surface: #ffffff;
+  --surface-hover: #f3f4f6;
+  --muted: #E5E5E5;
+  --muted-foreground: #4B5563;
+}
+
+html[data-theme="dark"] {
+  --background: #141414; /* slightly lighter */
+  --foreground: #ffffff;
+  --surface: #1A1A1A;
+  --surface-hover: #222222;
+  --muted: #2a2a2a;
+  --muted-foreground: #a3a3a3;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  accent-color: var(--color-primary);
+}
+
+/* Utility helpers leveraging CSS variables without touching Tailwind config */
+.btn-primary {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+.btn-primary-gradient {
+  background-image: var(--gradient-primary);
+  color: #ffffff;
+}
+.btn-primary-soft {
+  background-color: color-mix(in oklab, var(--color-primary-end) 80%, white 20%);
+  color: #ffffff;
+}
+.text-muted {
+  color: var(--muted-foreground);
+}
+.border-muted {
+  border-color: var(--muted);
+}
+.surface {
+  background: var(--surface);
+}
+.surface-hover:hover {
+  background: var(--surface-hover);
 }

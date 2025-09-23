@@ -6,7 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:exec": "supabase db execute --file sql/schema.sql",
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_REF > src/types/supabase.ts",
+    "db:reset:local": "supabase db reset",
+    "supabase:start": "supabase start"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -26,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
+    "supabase": "^2.45.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
