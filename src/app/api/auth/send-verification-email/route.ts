@@ -21,10 +21,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (userError || !user) {
-      return NextResponse.json(
-        { detail: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ detail: "User not found" }, { status: 404 });
     }
 
     if (user.is_verified) {
@@ -35,8 +32,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate a verification token
-    const verificationToken = Buffer.from(`${userId}:${Date.now()}`).toString('base64');
-    
+    const verificationToken = Buffer.from(`${userId}:${Date.now()}`).toString(
+      "base64"
+    );
+
     // Store verification token (you could store this in a separate table for better security)
     // For now, we'll use a simple approach with the token in the URL
 
@@ -52,16 +51,15 @@ export async function POST(req: NextRequest) {
 
     // For development/testing, we'll just return the URL
     // In production, you would actually send the email here
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    
+    const isDevelopment = process.env.NODE_ENV === "development";
+
     return NextResponse.json({
-      message: isDevelopment 
+      message: isDevelopment
         ? `Verification email sent! (Dev mode: ${verificationUrl})`
         : "Verification email sent successfully",
       verification_url: isDevelopment ? verificationUrl : undefined,
-      token: isDevelopment ? verificationToken : undefined
+      token: isDevelopment ? verificationToken : undefined,
     });
-
   } catch (error) {
     console.error("Error sending verification email:", error);
     return NextResponse.json(
