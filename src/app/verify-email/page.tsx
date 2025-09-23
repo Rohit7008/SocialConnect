@@ -12,18 +12,49 @@ function VerifyEmailContent() {
 
   useEffect(() => {
     const token = searchParams.get("token");
+    const type = searchParams.get("type");
     const user = searchParams.get("user");
 
-    if (!token || !user) {
+    // Handle Supabase native verification
+    if (token && type === "signup") {
+      verifySupabaseEmail(token);
+    }
+    // Handle our custom verification
+    else if (token && user) {
+      verifyCustomEmail(token, user);
+    }
+    else {
       setStatus("error");
       setMessage("Invalid verification link");
-      return;
     }
-
-    verifyEmail(token, user);
   }, [searchParams]);
 
-  const verifyEmail = async (token: string, userId: string) => {
+  const verifySupabaseEmail = async (token: string) => {
+    try {
+      const response = await fetch("/api/auth/verify-supabase-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus("success");
+        setMessage(data.message || "Email verified successfully!");
+      } else {
+        setStatus("error");
+        setMessage(data.detail || "Verification failed");
+      }
+    } catch (error) {
+      setStatus("error");
+      setMessage("Network error. Please try again.");
+    }
+  };
+
+  const verifyCustomEmail = async (token: string, userId: string) => {
     try {
       const response = await fetch("/api/auth/verify-email", {
         method: "POST",
@@ -139,21 +170,23 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <div className="max-w-md w-full mx-auto p-6">
-          <div className="bg-[var(--surface)] border border-muted rounded-lg p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary-start)] mx-auto mb-4"></div>
-            <h1 className="text-xl font-semibold text-[var(--foreground)] mb-2">
-              Loading...
-            </h1>
-            <p className="text-[var(--muted-foreground)]">
-              Preparing verification page.
-            </p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+          <div className="max-w-md w-full mx-auto p-6">
+            <div className="bg-[var(--surface)] border border-muted rounded-lg p-8 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary-start)] mx-auto mb-4"></div>
+              <h1 className="text-xl font-semibold text-[var(--foreground)] mb-2">
+                Loading...
+              </h1>
+              <p className="text-[var(--muted-foreground)]">
+                Preparing verification page.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   );

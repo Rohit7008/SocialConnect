@@ -21,9 +21,12 @@ export async function POST(req: NextRequest) {
     .select("id")
     .eq("username", username)
     .maybeSingle();
-  
+
   if (usernameError)
-    return NextResponse.json({ detail: usernameError.message }, { status: 500 });
+    return NextResponse.json(
+      { detail: usernameError.message },
+      { status: 500 }
+    );
   if (existingUsername)
     return NextResponse.json(
       { detail: "Username already exists" },
@@ -44,7 +47,7 @@ export async function POST(req: NextRequest) {
         role: "user",
         is_verified: false,
       })
-      .select("id")
+      .select("id, username")
       .single();
 
     if (profileError) {
@@ -55,36 +58,39 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Send verification email
+    // Try to create user in Supabase Auth for email verification
     try {
-      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/send-verification-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          userId: profileData.id,
-        }),
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: false, // This triggers the verification email
+        user_metadata: {
+          username,
+          first_name,
+          last_name,
+          profile_id: profileData.id, // Link to our profile
+        }
       });
 
-      const emailData = await emailResponse.json();
-      
-      if (emailResponse.ok) {
-        console.log("Verification email sent:", emailData.message);
-      } else {
-        console.warn("Failed to send verification email:", emailData.detail);
+      if (authData?.user) {
+        console.log("✅ Supabase Auth user created successfully");
+        console.log("📧 Verification email should be sent automatically");
       }
-    } catch (emailError) {
-      console.warn("Error sending verification email:", emailError);
-      // Don't fail registration if email sending fails
+    } catch (authError) {
+      console.warn("⚠️ Could not create Supabase Auth user (using fallback):", authError);
+      // Continue with registration even if Supabase Auth fails
     }
 
     return NextResponse.json(
       { 
         id: profileData.id, 
         message: "Registration successful! Please check your email to verify your account.",
-        verification_required: true
+        verification_required: true,
+        user: {
+          id: profileData.id,
+          username: profileData.username,
+          email: email
+        }
       },
       { status: 201 }
     );

@@ -15,22 +15,28 @@ export async function POST(req: NextRequest) {
   }
   const { identifier, password } = parsed.data;
 
+  // Try to find user by email or username
   const { data: user, error } = await supabaseAdmin
     .from("profiles")
     .select("id, username, email, password_hash, role, is_verified")
     .or(`email.eq.${identifier},username.eq.${identifier}`)
     .single();
-  if (error)
+  
+  if (error) {
     return NextResponse.json(
       { detail: "Invalid credentials" },
       { status: 401 }
     );
+  }
+
+  // Verify password
   const ok = await bcrypt.compare(password, user.password_hash);
-  if (!ok)
+  if (!ok) {
     return NextResponse.json(
       { detail: "Invalid credentials" },
       { status: 401 }
     );
+  }
 
   const skipVerify = process.env.DEV_SKIP_VERIFICATION === "true";
   if (!user.is_verified && !skipVerify)
