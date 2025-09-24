@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 function VerifyEmailContent() {
   const [status, setStatus] = useState<"verifying" | "success" | "error">(
@@ -22,8 +23,7 @@ function VerifyEmailContent() {
     // Handle our custom verification
     else if (token && user) {
       verifyCustomEmail(token, user);
-    }
-    else {
+    } else {
       setStatus("error");
       setMessage("Invalid verification link");
     }
@@ -116,12 +116,12 @@ function VerifyEmailContent() {
                 Email Verified!
               </h1>
               <p className="text-[var(--muted-foreground)] mb-6">{message}</p>
-              <a
+              <Link
                 href="/"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[var(--color-primary-start)] hover:bg-[var(--color-primary-end)] transition-colors"
               >
                 Continue to Login
-              </a>
+              </Link>
             </>
           )}
 
@@ -147,18 +147,18 @@ function VerifyEmailContent() {
               </h1>
               <p className="text-[var(--muted-foreground)] mb-6">{message}</p>
               <div className="space-y-2">
-                <a
+                <Link
                   href="/register"
                   className="block w-full px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[var(--color-primary-start)] hover:bg-[var(--color-primary-end)] transition-colors"
                 >
                   Try Registering Again
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/"
                   className="block w-full px-4 py-2 border border-[var(--color-primary-start)] text-sm font-medium rounded-md text-[var(--color-primary-start)] bg-transparent hover:bg-[var(--color-primary-start)] hover:text-white transition-colors"
                 >
                   Back to Login
-                </a>
+                </Link>
               </div>
             </>
           )}

@@ -6,6 +6,7 @@ A full-featured social media platform built with Next.js 15, Supabase, and moder
 
 ### Core Features
 - **User Authentication & Authorization** - Secure JWT-based authentication with role-based access
+- **Email Verification System** - Hybrid system supporting both Supabase native and custom email verification
 - **Social Feed** - Real-time post feed with like, comment, and follow functionality
 - **User Profiles** - Customizable profiles with privacy settings (Public/Private/Followers Only)
 - **Content Management** - Create, edit, and delete posts with image uploads
@@ -23,7 +24,7 @@ A full-featured social media platform built with Next.js 15, Supabase, and moder
 
 - **Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS
 - **Backend:** Next.js API Routes, Supabase (PostgreSQL)
-- **Authentication:** JWT with bcrypt password hashing
+- **Authentication:** JWT with bcrypt password hashing + Supabase Auth integration
 - **Storage:** Supabase Storage for file uploads
 - **Real-time:** Supabase Realtime subscriptions
 - **Deployment:** Vercel-ready with environment configuration
@@ -108,8 +109,11 @@ Open [http://localhost:3000](http://localhost:3000) to access the application.
 
 ### 7. Test Email Verification
 ```bash
-# Run the email verification test
+# Test custom email verification system
 node test-email-verification.js
+
+# Test Supabase native email verification
+node test-supabase-verification.js
 ```
 
 ## 📱 Usage
@@ -129,10 +133,12 @@ node test-email-verification.js
 ## 🔌 API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - User registration (sends verification email)
+- `POST /api/auth/register` - User registration (hybrid verification system)
 - `POST /api/auth/login` - User login
-- `POST /api/auth/verify-email` - Verify email with token
+- `POST /api/auth/verify-email` - Verify email with custom token
+- `POST /api/auth/verify-supabase-email` - Verify email with Supabase token
 - `POST /api/auth/resend-verification` - Resend verification email
+- `POST /api/auth/send-verification-email` - Send custom verification email
 - `POST /api/auth/token/refresh` - Refresh JWT token
 - `POST /api/auth/logout` - User logout
 - `POST /api/auth/password-reset` - Request password reset
@@ -181,6 +187,7 @@ node test-email-verification.js
 
 ### Public Pages
 - `/` - Login/Register page
+- `/verify-email` - Email verification page (handles both Supabase and custom tokens)
 - `/feed` - Main social feed
 - `/explore` - Discover content
 - `/profile` - User profile management

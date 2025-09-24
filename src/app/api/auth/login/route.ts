@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     .select("id, username, email, password_hash, role, is_verified")
     .or(`email.eq.${identifier},username.eq.${identifier}`)
     .single();
-  
+
   if (error) {
     return NextResponse.json(
       { detail: "Invalid credentials" },
