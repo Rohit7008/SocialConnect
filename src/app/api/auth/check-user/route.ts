@@ -6,14 +6,19 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json();
     if (!email)
       return NextResponse.json({ detail: "email required" }, { status: 400 });
-    const { data, error } = await supabaseAdmin.auth.admin.getUserByEmail(
-      email
-    );
+
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email, username, is_verified")
+      .eq("email", email)
+      .maybeSingle();
+
     if (error)
       return NextResponse.json({ detail: error.message }, { status: 400 });
+
     return NextResponse.json({
-      exists: !!data?.user,
-      user: data?.user ?? null,
+      exists: !!data,
+      user: data ?? null,
     });
   } catch (e: any) {
     return NextResponse.json(

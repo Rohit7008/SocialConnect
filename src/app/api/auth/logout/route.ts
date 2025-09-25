@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST() {
+// Stateless JWT logout: client should discard refresh token; optional blacklist table can be added
+export async function POST(_req: NextRequest) {
   const isProd = process.env.NODE_ENV === "production";
   const res = NextResponse.json({ message: "Logged out" });
   res.cookies.set("sb-access-token", "", {
@@ -16,11 +17,4 @@ export async function POST() {
     maxAge: 0,
   });
   return res;
-}
-
-import { NextRequest, NextResponse } from "next/server";
-
-// Stateless JWT logout: client should discard refresh token; optional blacklist table can be added
-export async function POST(_req: NextRequest) {
-  return NextResponse.json({ message: "Logged out" });
 }
