@@ -85,9 +85,10 @@ export default function PostDetailPage() {
 
   function handleAuthRequired(action: string) {
     // Check if user is authenticated by looking for access token
-    const token = typeof window !== "undefined" ? localStorage.getItem("access") : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("access") : null;
     const userAuthenticated = !!token;
-    
+
     if (!userAuthenticated) {
       setAuthPopupAction(action);
       setShowAuthPopup(true);

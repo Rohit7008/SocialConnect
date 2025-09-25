@@ -1,7 +1,12 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthProvider";
+import { saveTokens } from "@/lib/clientAuth";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { setUser } = useAuth();
   const [form, setForm] = useState({
     email: "",
     username: "",
@@ -16,17 +21,40 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
     setOk(null);
-    const res = await fetch("/api/auth/register", {
+    
+    // First register the user
+    const registerRes = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.detail || "Registration failed");
+    const registerData = await registerRes.json();
+    if (!registerRes.ok) {
+      setError(registerData.detail || "Registration failed");
       return;
     }
-    setOk("Registered! Please verify email, then login.");
+
+    // Automatically log in the user after successful registration
+    const loginRes = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        identifier: form.email, // Use email for login
+        password: form.password,
+      }),
+    });
+    const loginData = await loginRes.json();
+    if (!loginRes.ok) {
+      setError("Registration successful but login failed. Please try logging in manually.");
+      return;
+    }
+
+    // Save tokens and update user context
+    saveTokens(loginData.access, loginData.refresh);
+    setUser(loginData.user);
+    
+    // Redirect to feed page
+    router.push("/feed");
   }
 
   return (

@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     );
 
   try {
-    // Create profile record directly (using our custom auth system)
+    // Previous custom auth: create profile with bcrypt password hash
     const password_hash = await bcrypt.hash(password, 10);
     const { data: profileData, error: profileError } = await supabaseAdmin
       .from("profiles")
@@ -45,52 +45,23 @@ export async function POST(req: NextRequest) {
         last_name,
         password_hash,
         role: "user",
-        is_verified: false,
+        is_verified: true,
       })
       .select("id, username")
       .single();
 
     if (profileError) {
-      console.error("Profile creation error:", profileError);
       return NextResponse.json(
         { detail: "Failed to create user profile" },
         { status: 500 }
       );
     }
 
-    // Try to create user in Supabase Auth for email verification
-    try {
-      const { data: authData, error: authError } =
-        await supabaseAdmin.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: false, // This triggers the verification email
-          user_metadata: {
-            username,
-            first_name,
-            last_name,
-            profile_id: profileData.id, // Link to our profile
-          },
-        });
-
-      if (authData?.user) {
-        console.log("✅ Supabase Auth user created successfully");
-        console.log("📧 Verification email should be sent automatically");
-      }
-    } catch (authError) {
-      console.warn(
-        "⚠️ Could not create Supabase Auth user (using fallback):",
-        authError
-      );
-      // Continue with registration even if Supabase Auth fails
-    }
-
     return NextResponse.json(
       {
         id: profileData.id,
-        message:
-          "Registration successful! Please check your email to verify your account.",
-        verification_required: true,
+        message: "Registration successful! You can now login.",
+        verification_required: false,
         user: {
           id: profileData.id,
           username: profileData.username,

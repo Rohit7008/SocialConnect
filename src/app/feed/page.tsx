@@ -119,7 +119,10 @@ export default function FeedPage() {
             className="absolute right-2 top-2 w-6 h-6 opacity-0 cursor-pointer"
             id="file-input"
           />
-          <label htmlFor="file-input" className="absolute right-2 top-2 cursor-pointer">
+          <label
+            htmlFor="file-input"
+            className="absolute right-2 top-2 cursor-pointer"
+          >
             <svg
               className="w-6 h-6 text-gray-500 hover:text-gray-700"
               fill="none"
